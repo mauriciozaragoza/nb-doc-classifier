@@ -1,3 +1,5 @@
+from math import log
+
 ny = 20
 nx = 61188
 nd = 11269
@@ -20,7 +22,8 @@ def read_counts(filename):
 		doc_label[document] = label
 		document += 1
 
-	py = [cy[i]/nd for i in range(ny)]
+	for i in range(ny):
+		py[i] = cy[i]/float(nd)
 
 def read_validation(filename):
 	current_id = 1
@@ -33,14 +36,16 @@ def read_validation(filename):
 		word_id = int(params[1]) 
 		word_count = int(params[2].strip())
 
-		if (doc_id != current_id):			
-			if classify(sample) == test_label[current_id]:
+		if (doc_id != current_id):	
+			label = classify(sample)
+			if label == test_label[current_id]:
 				correct += 1
 
 			current_id = doc_id
 			sample = [0 for i in range(nx)]
+			print "classified: " + str(label) + " correct: "  + str(test_label[current_id])
 		
-		sample[word_id] = word_count
+		sample[word_id] = word_count		
 			
 	if classify(sample) == test_label[current_id]:
 		correct += 1
@@ -49,7 +54,7 @@ def read_validation(filename):
 
 def read_validation_label(filename):
 	for line in open(filename, "r"):
-		test_label.append(int(line.strip()))
+		test_label.append(int(line.strip()) - 1)
 
 def read_bag(filename):
 	for line in open(filename, "r"):
@@ -65,7 +70,7 @@ def read_bag(filename):
 def map_estimate():
 	for i in range(len(bag)):
 		total_words = 0
-		
+
 		for j in range(len(bag[0])):
 			total_words += bag[i][j]
 			bag[i][j] += alpha
@@ -74,16 +79,24 @@ def map_estimate():
 			bag[i][j] /= (total_words + nx)
 
 def classify(d):
-	max_val = 0
+	max_val = 100000000
 	arg_max = 0
+	for i in range(len(d)):
+		d[i] += alpha
+
 	for i in range(ny):
 		posteriori = 1
+
 		for j in range(nx):
-			posteriori *= bag[i][j] * d[j]
-		arg = py[i] * posteriori
-		if (arg > max_val):
+			posteriori += log(bag[i][j], 2) * -d[j]
+		arg = log(py[i], 2) + posteriori
+
+		# print str(py[i]) + " * " + str(posteriori) + " = " + str(arg)
+
+		if (arg < max_val):
 			arg_max = i
 			max_val = arg
+
 	return arg_max
 
 
@@ -91,8 +104,13 @@ def classify(d):
 
 # MAIN
 
+print "reading counts"
 read_counts("data/train.label")
+print "reading bag"
 read_bag("data/train.data")
+print "computing posteriori"
 map_estimate()
+print "reading labels"
 read_validation_label("data/test.label")
+print "classifying"
 read_validation("data/test.data")
