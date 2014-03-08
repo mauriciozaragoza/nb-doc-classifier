@@ -7,6 +7,7 @@ py = [0 for i in range(ny)]
 
 alpha = 1 / float(nx)
 doc_label = [0 for i in range(nx)]
+test_label = []
 
 bag = [[0 for i in range(nx)] for j in range(ny)]
 
@@ -24,19 +25,31 @@ def read_counts(filename):
 def read_validation(filename):
 	current_id = 1
 	sample = [0 for i in range(nx)]
+	correct = 0
+
 	for line in open(filename, "r"):
 		params = line.split(" ");
 		doc_id = int(params[0])
 		word_id = int(params[1]) 
 		word_count = int(params[2].strip())
 
+		if (doc_id != current_id):			
+			if classify(sample) == test_label[current_id]:
+				correct += 1
+
+			current_id = doc_id
+			sample = [0 for i in range(nx)]
+		
 		sample[word_id] = word_count
+			
+	if classify(sample) == test_label[current_id]:
+		correct += 1
 
-		if (doc_id != current_id):
-			classify(sample)
+	print correct / float(current_id)
 
-	classify(sample)
-
+def read_validation_label(filename):
+	for line in open(filename, "r"):
+		test_label.append(int(line.strip()))
 
 def read_bag(filename):
 	for line in open(filename, "r"):
@@ -51,6 +64,8 @@ def read_bag(filename):
 
 def map_estimate():
 	for i in range(len(bag)):
+		total_words = 0
+		
 		for j in range(len(bag[0])):
 			total_words += bag[i][j]
 			bag[i][j] += alpha
@@ -64,7 +79,7 @@ def classify(d):
 	for i in range(ny):
 		posteriori = 1
 		for j in range(nx):
-			posteriori *= bag[i][j]
+			posteriori *= bag[i][j] * d[j]
 		arg = py[i] * posteriori
 		if (arg > max_val):
 			arg_max = i
@@ -78,3 +93,6 @@ def classify(d):
 
 read_counts("data/train.label")
 read_bag("data/train.data")
+map_estimate()
+read_validation_label("data/test.label")
+read_validation("data/test.data")
