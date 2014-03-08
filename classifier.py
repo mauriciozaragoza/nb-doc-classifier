@@ -1,17 +1,19 @@
-nY = 20
-nX = 61188
+ny = 20
+nx = 61188
 
-cY = [0 for i in range(nY)]
-doc_label = [0 for i in range(nX)]
+alpha = 1 / float(nx)
 
-bag = [[0 for i in range(nX)] for j in range(nY)]
+cy = [0 for i in range(ny)]
+doc_label = [0 for i in range(nx)]
+
+bag = [[0 for i in range(nx)] for j in range(ny)]
 
 def read_counts(filename):
 	document = 0
 
 	for line in open(filename, "r"):
 		label = int(line.strip()) - 1
-		cY[label] += 1
+		cy[label] += 1
 		doc_label[document] = label
 		document += 1
 
@@ -26,7 +28,16 @@ def read_bag(filename):
 
 		bag[label][word_id] += word_count
 
+def map():
+	for i in range(len(bag)):
+		for j in range(len(bag[0])):
+			total_words += bag[i][j]
+			bag[i][j] += alpha
+		for j in range(len(bag[0])):
+			bag[i][j] /= (total_words + nx)
+
 # MAIN
 
-read_counts("train.label")
-read_bag("train.data")
+read_counts("data/train.label")
+read_bag("data/train.data")
+
