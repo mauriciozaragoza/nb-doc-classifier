@@ -21,6 +21,22 @@ def read_counts(filename):
 
 	py = [cy[i]/nd for i in range(ny)]
 
+def read_validation(filename):
+	current_id = 1
+	sample = [0 for i in range(nx)]
+	for line in open(filename, "r"):
+		params = line.split(" ");
+		doc_id = int(params[0])
+		word_id = int(params[1]) 
+		word_count = int(params[2].strip())
+
+		sample[word_id] = word_count
+
+		if (doc_id != current_id):
+			classify(sample)
+
+	classify(sample)
+
 
 def read_bag(filename):
 	for line in open(filename, "r"):
@@ -38,6 +54,7 @@ def map_estimate():
 		for j in range(len(bag[0])):
 			total_words += bag[i][j]
 			bag[i][j] += alpha
+			
 		for j in range(len(bag[0])):
 			bag[i][j] /= (total_words + nx)
 
