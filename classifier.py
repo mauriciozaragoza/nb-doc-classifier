@@ -43,14 +43,14 @@ def read_validation(filename):
 
 			current_id = doc_id
 			sample = [0 for i in range(nx)]
-			print "classified: " + str(label) + " correct: "  + str(test_label[current_id])
+			print "classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id - 1))
 		
 		sample[word_id] = word_count		
 			
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
-	print correct / float(current_id)
+	print "classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id - 1))
 
 def read_validation_label(filename):
 	for line in open(filename, "r"):
@@ -85,10 +85,7 @@ def classify(d):
 		d[i] += alpha
 
 	for i in range(ny):
-		posteriori = 1
-
-		for j in range(nx):
-			posteriori += log(bag[i][j], 2) * -d[j]
+		posteriori = sum([log(bag[i][j], 2) * -d[j] for j in range(nx)])
 		arg = log(py[i], 2) + posteriori
 
 		# print str(py[i]) + " * " + str(posteriori) + " = " + str(arg)
@@ -98,9 +95,6 @@ def classify(d):
 			max_val = arg
 
 	return arg_max
-
-
-
 
 # MAIN
 
