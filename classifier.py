@@ -21,6 +21,7 @@ def read_counts(filename):
 
 	py = [cy[i]/nd for i in range(ny)]
 
+
 def read_bag(filename):
 	for line in open(filename, "r"):
 		params = line.split(" ");
@@ -38,7 +39,23 @@ def map_estimate():
 			total_words += bag[i][j]
 			bag[i][j] += alpha
 		for j in range(len(bag[0])):
-			bag[i][j] /= (total_words + nx)1
+			bag[i][j] /= (total_words + nx)
+
+def classify(d):
+	max_val = 0
+	arg_max = 0
+	for i in range(ny):
+		posteriori = 1
+		for j in range(nx):
+			posteriori *= bag[i][j]
+		arg = py[i] * posteriori
+		if (arg > max_val):
+			arg_max = i
+			max_val = arg
+	return arg_max
+
+
+
 
 # MAIN
 
