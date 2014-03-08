@@ -1,9 +1,11 @@
 ny = 20
 nx = 61188
-
-alpha = 1 / float(nx)
+nd = 11269
 
 cy = [0 for i in range(ny)]
+py = [0 for i in range(ny)]
+
+alpha = 1 / float(nx)
 doc_label = [0 for i in range(nx)]
 
 bag = [[0 for i in range(nx)] for j in range(ny)]
@@ -17,6 +19,8 @@ def read_counts(filename):
 		doc_label[document] = label
 		document += 1
 
+	py = [cy[i]/nd for i in range(ny)]
+
 def read_bag(filename):
 	for line in open(filename, "r"):
 		params = line.split(" ");
@@ -28,16 +32,15 @@ def read_bag(filename):
 
 		bag[label][word_id] += word_count
 
-def map():
+def map_estimate():
 	for i in range(len(bag)):
 		for j in range(len(bag[0])):
 			total_words += bag[i][j]
 			bag[i][j] += alpha
 		for j in range(len(bag[0])):
-			bag[i][j] /= (total_words + nx)
+			bag[i][j] /= (total_words + nx)1
 
 # MAIN
 
 read_counts("data/train.label")
 read_bag("data/train.data")
-
