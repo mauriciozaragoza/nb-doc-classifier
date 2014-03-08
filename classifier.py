@@ -1,5 +1,6 @@
 ny = 20
 nx = 61188
+nd = 11269
 
 cy = [0 for i in range(ny)]
 py = [0 for i in range(ny)]
@@ -16,8 +17,8 @@ def read_counts(filename):
 		cy[label] += 1
 		doc_label[document] = label
 		document += 1
-		
-	py = [cy[i]/nx for i in range(ny)]
+
+	py = [cy[i]/nd for i in range(ny)]
 
 def read_bag(filename):
 	for line in open(filename, "r"):
