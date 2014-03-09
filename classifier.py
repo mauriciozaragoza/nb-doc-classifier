@@ -1,17 +1,19 @@
+# from multiprocessing import Pool
+import numpy as np
 from math import log
 
 ny = 20
 nx = 61188
 nd = 11269
 
-cy = [0 for i in range(ny)]
-py = [0 for i in range(ny)]
+cy = np.zeros(ny)
+py =  np.zeros(ny)
 
 alpha = 1 / float(nx)
-doc_label = [0 for i in range(nx)]
+doc_label = np.zeros(nx)
 test_label = []
 
-bag = [[0 for i in range(nx)] for j in range(ny)]
+bag = np.zeros((ny, nx)) # [[0 for i in range(nx)] for j in range(ny)]
 
 def read_counts(filename):
 	document = 0
@@ -26,14 +28,17 @@ def read_counts(filename):
 		py[i] = cy[i]/float(nd)
 
 def read_validation(filename):
-	current_id = 1
-	sample = [0 for i in range(nx)]
+	current_id = 0
+
+	sample = np.empty(nx) # [0 for i in range(nx)]
+	sample[:] = alpha
+
 	correct = 0
 
 	for line in open(filename, "r"):
 		params = line.split(" ");
-		doc_id = int(params[0])
-		word_id = int(params[1]) 
+		doc_id = int(params[0]) - 1
+		word_id = int(params[1]) - 1
 		word_count = int(params[2].strip())
 
 		if (doc_id != current_id):	
@@ -42,15 +47,18 @@ def read_validation(filename):
 				correct += 1
 
 			current_id = doc_id
-			sample = [0 for i in range(nx)]
-			print "classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id - 1))
+
+			sample = np.empty(nx)
+			sample[:] = alpha
+
+			#print str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id))
 		
-		sample[word_id] = word_count		
+		sample[word_id] = word_count
 			
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
-	print "classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id - 1))
+	print "classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id + 1))
 
 def read_validation_label(filename):
 	for line in open(filename, "r"):
@@ -59,8 +67,8 @@ def read_validation_label(filename):
 def read_bag(filename):
 	for line in open(filename, "r"):
 		params = line.split(" ");
-		doc_id = int(params[0])
-		word_id = int(params[1]) 
+		doc_id = int(params[0]) - 1
+		word_id = int(params[1]) - 1
 		word_count = int(params[2].strip())
 
 		label = doc_label[doc_id]
@@ -82,22 +90,8 @@ def map_estimate():
 			bag[i][j] = log(bag[i][j], 2)
 
 def classify(d):
-	max_val = 100000000
-	arg_max = 0
-	for i in range(len(d)):
-		d[i] += alpha
-
-	for i in range(ny):
-		posteriori = sum([bag[i][j] * -d[j] for j in range(nx)])
-		arg = log(py[i], 2) + posteriori
-
-		# print str(py[i]) + " * " + str(posteriori) + " = " + str(arg)
-
-		if (arg < max_val):
-			arg_max = i
-			max_val = arg
-
-	return arg_max
+	posteriori = np.dot(bag, d) + py
+	return posteriori.argmax()
 
 # MAIN
 
