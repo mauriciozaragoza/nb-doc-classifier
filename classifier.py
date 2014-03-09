@@ -78,6 +78,9 @@ def map_estimate():
 		for j in range(len(bag[0])):
 			bag[i][j] /= (total_words + nx)
 
+		for j in range(len(bag[0])):
+			bag[i][j] = log(bag[i][j], 2)
+
 def classify(d):
 	max_val = 100000000
 	arg_max = 0
@@ -85,7 +88,7 @@ def classify(d):
 		d[i] += alpha
 
 	for i in range(ny):
-		posteriori = sum([log(bag[i][j], 2) * -d[j] for j in range(nx)])
+		posteriori = sum([bag[i][j] * -d[j] for j in range(nx)])
 		arg = log(py[i], 2) + posteriori
 
 		# print str(py[i]) + " * " + str(posteriori) + " = " + str(arg)
