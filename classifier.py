@@ -1,4 +1,3 @@
-# from multiprocessing import Pool
 import numpy as np
 from math import log
 
@@ -13,7 +12,8 @@ alpha = 1 / float(nx)
 doc_label = np.zeros(nx)
 test_label = []
 
-bag = np.zeros((ny, nx)) # [[0 for i in range(nx)] for j in range(ny)]
+bag = np.zeros((ny, nx))
+bag[:] = alpha
 
 def read_counts(filename):
 	document = 0
@@ -51,14 +51,14 @@ def read_validation(filename):
 			sample = np.empty(nx)
 			sample[:] = alpha
 
-			#print str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id))
+			# print str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id))
 		
 		sample[word_id] = word_count
 			
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
-	print "classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id + 1))
+	print "accuracy: " + str(correct / float(current_id + 1))
 
 def read_validation_label(filename):
 	for line in open(filename, "r"):
@@ -76,22 +76,18 @@ def read_bag(filename):
 		bag[label][word_id] += word_count
 
 def map_estimate():
-	for i in range(len(bag)):
-		total_words = 0
+	global bag
 
-		for j in range(len(bag[0])):
-			total_words += bag[i][j]
-			bag[i][j] += alpha
-			
-		for j in range(len(bag[0])):
-			bag[i][j] /= (total_words + nx)
+	total_words = bag.sum(1)
+	
+	for i in range(len(bag[0])):
+		bag[:, i] /= total_words
 
-		for j in range(len(bag[0])):
-			bag[i][j] = log(bag[i][j], 2)
+	bag = np.log2(bag)
 
 def classify(d):
-	posteriori = np.dot(bag, d) + py
-	return posteriori.argmax()
+	probabilities = np.dot(bag, d) + py
+	return probabilities.argmax()
 
 # MAIN
 
@@ -99,7 +95,7 @@ print "reading counts"
 read_counts("data/train.label")
 print "reading bag"
 read_bag("data/train.data")
-print "computing posteriori"
+print "computing MAP parameters"
 map_estimate()
 print "reading labels"
 read_validation_label("data/test.label")
