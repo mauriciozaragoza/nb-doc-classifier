@@ -6,7 +6,7 @@ nx = 61188
 nd = 11269
 
 cy = np.zeros(ny)
-py =  np.zeros(ny)
+py =  np.empty(ny)
 
 alpha = 1 / float(nx)
 doc_label = np.zeros(nx)
@@ -24,8 +24,7 @@ def read_counts(filename):
 		doc_label[document] = label
 		document += 1
 
-	for i in range(ny):
-		py[i] = cy[i]/float(nd)
+	py = cy / float(nd)
 
 def read_validation(filename):
 	current_id = 0
