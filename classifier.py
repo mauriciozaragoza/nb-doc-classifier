@@ -11,6 +11,7 @@ py =  np.empty(ny)
 alpha = 1 / float(nx)
 doc_label = np.zeros(nx)
 test_label = []
+confusion = np.zeros((ny,ny), dtype = np.int32)
 
 bag = np.zeros((ny, nx))
 bag[:] = alpha
@@ -47,13 +48,17 @@ def read_validation(filename):
 
 			current_id = doc_id
 
+			confusion[test_label[current_id]][label] += 1
+
 			sample = np.empty(nx)
 			sample[:] = alpha
 
 			# print str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id))
 		
 		sample[word_id] = word_count
-			
+	
+	confusion[test_label[current_id]][label] += 1
+
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
@@ -88,6 +93,11 @@ def classify(d):
 	probabilities = np.dot(bag, d) + py
 	return probabilities.argmax()
 
+def print_confusion():
+	for array in confusion:
+		print array
+
+
 # MAIN
 
 print "reading counts"
@@ -100,3 +110,5 @@ print "reading labels"
 read_validation_label("data/test.label")
 print "classifying"
 read_validation("data/test.data")
+
+print_confusion()
