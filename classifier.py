@@ -8,7 +8,7 @@ nd = 11269
 cy = np.zeros(ny)
 py = np.empty(ny)
 
-alpha = 0.01
+alpha = 1/float(nx)
 doc_label = np.zeros(nx)
 test_label = []
 confusion = np.zeros((ny,ny), dtype = np.int32)
@@ -27,6 +27,24 @@ def read_counts(filename):
 		document += 1
 
 	py = cy / float(nd)
+
+def get_ranked_words(filename):
+	mylist = []
+	words = ["" for i in range(nx)]
+	for line in bag:
+		mylist.extend(line)
+
+	plain_bag = np.array(mylist)
+	words_index = plain_bag.argsort()[:100]
+	words_index = np.remainder(words_index, nx)
+
+	index = 0
+	for line in open(filename, "r"):
+		words[index] = line.strip()
+		index += 1
+
+	for i in words_index:
+		print words[i]
 
 def read_validation(filename):
 	current_id = 0
@@ -116,6 +134,7 @@ print("reading bag")
 read_bag("data/train.data")
 print("computing MAP parameters")
 map_estimate()
+get_ranked_words("data/vocabulary.txt")
 print("reading labels")
 read_validation_label("data/test.label")
 print("classifying")
