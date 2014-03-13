@@ -35,16 +35,20 @@ def get_ranked_words(filename):
 		mylist.extend(line)
 
 	plain_bag = np.array(mylist)
-	words_index = plain_bag.argsort()[:100]
-	words_index = np.remainder(words_index, nx)
+	words_index = plain_bag.argsort()[:100] % nx
 
 	index = 0
 	for line in open(filename, "r"):
 		words[index] = line.strip()
 		index += 1
 
+	file = open("rank.txt", "w")
+
+
 	for i in words_index:
-		print words[i]
+		file.write(str(words[i]) + "\n")
+
+	file.close()
 
 def read_validation(filename):
 	current_id = 0
