@@ -62,6 +62,9 @@ def read_validation(filename):
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
+	print "correctly classified documents: " + str(correct)
+	print "total number of tested documents: " + str(current_id + 1)
+
 	print "accuracy: " + str(correct / float(current_id + 1))
 
 def read_validation_label(filename):
@@ -111,4 +114,4 @@ read_validation_label("data/test.label")
 print "classifying"
 read_validation("data/test.data")
 
-print_confusion()
+#print_confusion()
