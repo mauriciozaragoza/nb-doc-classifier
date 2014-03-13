@@ -124,7 +124,9 @@ def classify(d):
 def print_confusion():
 	file = open("confusion.txt", "w")
 	for array in confusion:
-		file.write(array)
+		for num in array:
+			file.write(str(num) + "\t")
+		file.write("\n")
 
 def is_number(s):
     try:
