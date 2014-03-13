@@ -6,17 +6,18 @@ nx = 61188
 nd = 11269
 
 cy = np.zeros(ny)
-py =  np.empty(ny)
+py = np.empty(ny)
 
-alpha = 1 / float(nx)
+alpha = 0.01
 doc_label = np.zeros(nx)
 test_label = []
 confusion = np.zeros((ny,ny), dtype = np.int32)
 
-bag = np.zeros((ny, nx))
+bag = np.zeros((ny, nx), dtype = np.float64)
 bag[:] = alpha
 
 def read_counts(filename):
+	global py
 	document = 0
 
 	for line in open(filename, "r"):
@@ -53,7 +54,7 @@ def read_validation(filename):
 			sample = np.empty(nx)
 			sample[:] = alpha
 
-			# print str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id))
+			# print(str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id)))
 		
 		sample[word_id] = word_count
 	
@@ -62,10 +63,10 @@ def read_validation(filename):
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
-	print "correctly classified documents: " + str(correct)
-	print "total number of tested documents: " + str(current_id + 1)
+	print("correctly classified documents: " + str(correct))
+	print("total number of tested documents: " + str(current_id + 1))
 
-	print "accuracy: " + str(correct / float(current_id + 1))
+	print("accuracy: " + str(correct / float(current_id + 1)))
 
 def read_validation_label(filename):
 	for line in open(filename, "r"):
@@ -87,31 +88,37 @@ def map_estimate():
 
 	total_words = bag.sum(1)
 	
+	regularization = total_words + alpha
 	for i in range(len(bag[0])):
-		bag[:, i] /= total_words
+		bag[:, i] /= regularization
+
+	map_probabilities = bag.sum(1);
+
+	assert abs((map_probabilities).sum() - ny) < 0.01, "conditional probabilities do not sum to 1, actual probability: " + str(map_probabilities) + " , " + str((map_probabilities).sum())
 
 	bag = np.log2(bag)
 
 def classify(d):
-	probabilities = np.dot(bag, d) + py
+	probabilities = (np.dot(bag, d) + py)
+	# print(probabilities)
 	return probabilities.argmax()
 
 def print_confusion():
 	for array in confusion:
-		print array
+		print(array)
 
 
 # MAIN
 
-print "reading counts"
+print("reading counts")
 read_counts("data/train.label")
-print "reading bag"
+print("reading bag")
 read_bag("data/train.data")
-print "computing MAP parameters"
+print("computing MAP parameters")
 map_estimate()
-print "reading labels"
+print("reading labels")
 read_validation_label("data/test.label")
-print "classifying"
+print("classifying")
 read_validation("data/test.data")
 
 #print_confusion()
