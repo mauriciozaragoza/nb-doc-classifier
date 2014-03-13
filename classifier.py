@@ -1,20 +1,21 @@
+import sys
 import numpy as np
 from math import log
 
 ny = 20
 nx = 61188
 nd = 11269
+alpha = 1/float(nx)
 
 cy = np.zeros(ny)
 py = np.empty(ny)
-
-alpha = 1/float(nx)
 doc_label = np.zeros(nx)
-test_label = []
 confusion = np.zeros((ny,ny), dtype = np.int32)
 
 bag = np.zeros((ny, nx), dtype = np.float64)
 bag[:] = alpha
+
+test_label = []
 
 def read_counts(filename):
 	global py
@@ -31,6 +32,7 @@ def read_counts(filename):
 def get_ranked_words(filename):
 	mylist = []
 	words = ["" for i in range(nx)]
+
 	for line in bag:
 		mylist.extend(line)
 
@@ -43,11 +45,8 @@ def get_ranked_words(filename):
 		index += 1
 
 	file = open("rank.txt", "w")
-
-
 	for i in words_index:
 		file.write(str(words[i]) + "\n")
-
 	file.close()
 
 def read_validation(filename):
@@ -75,8 +74,6 @@ def read_validation(filename):
 
 			sample = np.empty(nx)
 			sample[:] = alpha
-
-			# print(str(doc_id) + " classified: " + str(label) + " correct: " + str(test_label[current_id]) + " accuracy: " + str(correct / float(current_id)))
 		
 		sample[word_id] = word_count
 	
@@ -85,10 +82,10 @@ def read_validation(filename):
 	if classify(sample) == test_label[current_id]:
 		correct += 1
 
-	print("correctly classified documents: " + str(correct))
-	print("total number of tested documents: " + str(current_id + 1))
+	print("\nCorrectly classified documents: " + str(correct))
+	print("Total number of tested documents: " + str(current_id + 1))
 
-	print("accuracy: " + str(correct / float(current_id + 1)))
+	print("Accuracy: " + str(correct / float(current_id + 1)))
 
 def read_validation_label(filename):
 	for line in open(filename, "r"):
@@ -122,26 +119,39 @@ def map_estimate():
 
 def classify(d):
 	probabilities = (np.dot(bag, d) + py)
-	# print(probabilities)
 	return probabilities.argmax()
 
 def print_confusion():
+	file = open("confusion.txt", "w")
 	for array in confusion:
-		print(array)
+		file.write(array)
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
 
 # MAIN
 
-print("reading counts")
-read_counts("data/train.label")
-print("reading bag")
-read_bag("data/train.data")
-print("computing MAP parameters")
-map_estimate()
-get_ranked_words("data/vocabulary.txt")
-print("reading labels")
-read_validation_label("data/test.label")
-print("classifying")
-read_validation("data/test.data")
+if len(sys.argv) == 2:
+	if is_number(sys.argv[1]):
+		alpha = float(sys.argv[1])
+	else:
+		print "Alpha must be numeric"
+		sys.exit()
 
-#print_confusion()
+print("Reading counts...")
+read_counts("data/train.label")
+print("Reading bag...")
+read_bag("data/train.data")
+print("Computing MAP parameters...")
+map_estimate()
+print("Getting top words...")
+get_ranked_words("data/vocabulary.txt")
+print("Reading labels...")
+read_validation_label("data/test.label")
+print("Classifying...")
+read_validation("data/test.data")
+print_confusion()
