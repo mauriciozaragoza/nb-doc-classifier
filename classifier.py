@@ -38,7 +38,7 @@ def read_bag(filename):
 		params = line.split(" "); 		
 		doc_id = int(params[0]) - 1 		# get the doc id
 		word_id = int(params[1]) - 1 		# get the word
-		word_count = int(params[2].strip())	#get the counter of that word
+		word_count = int(params[2].strip())	# get the counter of that word
 
 		label = doc_label[doc_id]			# get the label of the word is being read
 
@@ -50,7 +50,7 @@ def map_estimate():
 
 	total_words = bag.sum(1)	# Get the total number of appearances of each word
 	
-	regularization = total_words + alpha 	# Add the alucinante to the total of words
+	regularization = total_words + alpha 	# Add the hallucinative to the total of words
 	for i in range(len(bag[0])):
 		bag[:, i] /= regularization			# Apply the regularization to each element in the bag
 
