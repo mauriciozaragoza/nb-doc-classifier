@@ -172,4 +172,4 @@ print("Classifying...")
 read_validation("data/test.data", posteriori)
 
 print_confusion()
-get_ranked_words("data/vocabulary.txt", bag)
+get_ranked_words("data/vocabulary.txt", posteriori)
