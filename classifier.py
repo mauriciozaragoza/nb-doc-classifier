@@ -106,7 +106,8 @@ def read_validation(filename, bag):
 	if classify(sample, bag) == test_label[current_id]: # if the answer is correct add one to correct
 		correct += 1
 
-	print("\nCorrectly classified documents: " + str(correct))			# Print correct answers
+	print("\nAlpha: " + str(alpha))										# Print alpha
+	print("Correctly classified documents: " + str(correct))			# Print correct answers
 	print("Total number of tested documents: " + str(current_id + 1))	# Print total of documents classified
 
 	print("Accuracy: " + str(correct / float(current_id + 1)))			# Print accuracy
@@ -158,35 +159,18 @@ if len(sys.argv) == 2:
 		print("Alpha must be numeric")
 		sys.exit()
 
-n_samples = 20
-# xaxis = sorted(np.logspace(log(0.00001, 10), log(1, 10), num = n_samples, base = 10))
-xaxis = sorted(np.linspace(0.00005, 0.0005, num = n_samples))
-print("testing on alphas: " + str(xaxis))
-yaxis = []
-
-plt.xlabel('Alpha')
-plt.ylabel('Accuracy')
-# plt.xscale('log')
-plt.grid(True)
-
 print("Reading counts...")
 read_counts("data/train.label")
 print("Reading bag...")
 read_bag("data/train.data")
-# print("Getting top words...")
-# get_ranked_words("data/vocabulary.txt")
 print("Reading labels...")
 read_validation_label("data/test.label")
 
-for a in xaxis:
-	alpha = a
-	print("computing MAP parameters")
-	posteriori = map_estimate(bag)
-	print("classifying")
-	yaxis.append(read_validation("data/test.data", posteriori))
 
-# print_confusion()
-print ("results: " + str(yaxis))
+print("Computing MAP parameters...")
+posteriori = map_estimate(bag)
+print("Classifying...")
+read_validation("data/test.data", posteriori)
 
-plt.plot(xaxis, yaxis)
-plt.show();
+print_confusion()
+get_ranked_words("data/vocabulary.txt", bag)
